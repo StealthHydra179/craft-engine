@@ -311,7 +311,7 @@ function getCodeOrgAPI(controller) {
       controller.clickUp();
     }
   };
-}
+};
 EventType = Object.freeze({
   WhenTouched : 0,
   WhenUsed : 1,
@@ -488,7 +488,7 @@ class Position {
   static fromArray(position) {
     return new Position(position[0], position[1]);
   }
-}
+};
 /**
  * Converts entities found within the levelConfig.actionPlane to a
  * levelConfig.entities suitable for loading by the game initializer.
@@ -1559,7 +1559,7 @@ class AssetLoader {
         throw `Asset ${key} needs config.type set in configuration.`;
     }
   }
-}
+};
 class AStarPathFinding {
   constructor(model) {
     this.levelModel = model;
@@ -1698,7 +1698,7 @@ class AStarPathFinding {
     // No path could be found, return empty array.
     return [];
   }
-}
+};
 /**
  * Group an array of positions into sets of connected positions. Default
  * definition of "connected" is "orthogonally adjacent", but that can be
@@ -1803,7 +1803,7 @@ class AdjacencySet {
     }
     return true;
   }
-}
+};
 
 class BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
@@ -2520,7 +2520,7 @@ class BaseEntity {
     this.handleMoveOffPressurePlate(new Position(0, 0));
     this.controller.levelView.playTrack(this.position, direction, true, this, null);
   }
-}
+};
 class Agent extends BaseEntity {
   constructor(controller, type, x, y, name, isOnBlock, facing) {
     super(controller, type, 'PlayerAgent', x, y, facing);
@@ -2690,7 +2690,7 @@ class Agent extends BaseEntity {
   canTriggerPressurePlates() {
     return true;
   }
-}
+};
 class Boat extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -2742,7 +2742,7 @@ class Boat extends BaseEntity {
       true  // yoyo
     );
   }
-}
+};
 class Chicken extends BaseEntity {
     constructor(controller, type, identifier, x, y, facing) {
         super(controller, type, identifier, x, y, facing);
@@ -2862,7 +2862,7 @@ class Chicken extends BaseEntity {
         this.sprite.x = this.offset[0] + 40 * this.position.x;
         this.sprite.y = this.offset[1] + 40 * this.position.y;
     }
-}
+};
 class Cod extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -2928,7 +2928,7 @@ class Cod extends BaseEntity {
     return true;
   }
 
-}
+};
 class Cow extends BaseEntity {
     constructor(controller, type, identifier, x, y, facing) {
         super(controller, type, identifier, x, y, facing);
@@ -3105,7 +3105,7 @@ class Cow extends BaseEntity {
         this.controller.levelView.playScaledSpeed(this.sprite.animations, animationName);
         this.controller.printErrorMsg(this.type + " calls animation : " + animationName + "\n");
     }
-}
+};
 class Creeper extends BaseEntity {
     constructor(controller, type, identifier, x, y, facing) {
         super(controller, type, identifier, x, y, facing);
@@ -3221,7 +3221,7 @@ class Creeper extends BaseEntity {
         this.sprite.x = this.offset[0] + 40 * this.position.x;
         this.sprite.y = this.offset[1] + 40 * this.position.y;
     }
-}
+};
 class Dolphin extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -3287,7 +3287,7 @@ class Dolphin extends BaseEntity {
     return true;
   }
 
-}
+};
 class IronGolem extends BaseEntity {
     constructor(controller, type, identifier, x, y, facing) {
         super(controller, type, identifier, x, y, facing);
@@ -3398,7 +3398,7 @@ class IronGolem extends BaseEntity {
         this.sprite.x = this.offset[0] + 40 * this.position[0];
         this.sprite.y = this.offset[1] + 40 * this.position[1];
     }
-}
+};
 class Player extends BaseEntity {
   constructor(controller, type, x, y, name, isOnBlock, facing) {
     super(controller, type, 'Player', x, y, facing);
@@ -3656,7 +3656,7 @@ class Player extends BaseEntity {
     return true;
   }
 
-}
+};
 class Salmon extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -3722,7 +3722,7 @@ class Salmon extends BaseEntity {
     return true;
   }
 
-}
+};
 class SeaTurtle extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -3794,7 +3794,7 @@ class SeaTurtle extends BaseEntity {
     return true;
   }
 
-}
+};
 class Sheep extends BaseEntity {
     constructor(controller, type, identifier, x, y, facing) {
         super(controller, type, identifier, x, y, facing);
@@ -4154,7 +4154,7 @@ class Sheep extends BaseEntity {
     getNakedSuffix() {
         return this.naked ? "naked_" : "";
     }
-}
+};
 class Squid extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -4217,7 +4217,7 @@ class Squid extends BaseEntity {
     return true;
   }
 
-}
+};
 class TropicalFish extends BaseEntity {
   constructor(controller, type, identifier, x, y, facing) {
     super(controller, type, identifier, x, y, facing);
@@ -4283,7 +4283,7 @@ class TropicalFish extends BaseEntity {
     return true;
   }
 
-}
+};
 class Zombie extends BaseEntity {
     constructor(controller, type, identifier, x, y, facing) {
         super(controller, type, identifier, x, y, facing);
@@ -4489,7 +4489,7 @@ class Zombie extends BaseEntity {
             }, 1500 / this.controller.tweenTimeScale);
         }
     }
-}
+};
 class BaseCommand {
   constructor(gameController, highlightCallback, targetEntity, onFinish) {
     this.GameController = gameController;
@@ -4551,7 +4551,7 @@ class BaseCommand {
   failed() {
     this.state = CommandState.FAILURE;
   }
-}
+};
 class CallbackCommand extends BaseCommand {
   constructor(gameController, highlightCallback, actionCallback, targetEntity, onFinish) {
     super(gameController, highlightCallback, targetEntity, onFinish);
@@ -4566,7 +4566,7 @@ class CallbackCommand extends BaseCommand {
     super.begin();
     this.actionCallback();
   }
-}
+};
 class CommandQueue {
   constructor(gameController) {
     this.gameController = gameController;
@@ -4723,7 +4723,7 @@ class CommandQueue {
     this.repeatCommands.push([codeBlock, iteration]);
     this.begin();
   }
-}
+};
 CommandState = Object.freeze({
   NOT_STARTED: 0,
   WORKING: 1,
@@ -4744,7 +4744,7 @@ class DestroyBlockCommand extends BaseCommand {
     super.begin();
     this.GameController.destroyBlock(this);
   }
-}
+};
 class IfBlockAheadCommand extends BaseCommand {
   constructor(gameController, highlightCallback, blockType, targetEntity, callback) {
     super(gameController, highlightCallback, targetEntity);
@@ -4792,7 +4792,7 @@ class IfBlockAheadCommand extends BaseCommand {
       this.state = CommandState.SUCCESS;
     }
   }
-}
+};
 class MoveBackwardCommand extends BaseCommand {
   constructor(gameController, highlightCallback, targetEntity) {
     super(gameController, highlightCallback, targetEntity);
@@ -4806,7 +4806,7 @@ class MoveBackwardCommand extends BaseCommand {
     super.begin();
     this.GameController.moveBackward(this);
   }
-}
+};
 class MoveDirectionCommand extends BaseCommand {
   constructor(gameController, highlightCallback, targetEntity, direction) {
     super(gameController, highlightCallback, targetEntity);
@@ -4821,7 +4821,7 @@ class MoveDirectionCommand extends BaseCommand {
     super.begin();
     this.GameController.moveDirection(this, this.Direciton);
   }
-}
+};
 class MoveForwardCommand extends BaseCommand {
   constructor(gameController, highlightCallback, targetEntity, onFinish) {
     super(gameController, highlightCallback, targetEntity, onFinish);
@@ -4835,7 +4835,7 @@ class MoveForwardCommand extends BaseCommand {
     super.begin();
     this.GameController.moveForward(this);
   }
-}
+};
 class PlaceBlockCommand extends BaseCommand {
   constructor(gameController, highlightCallback, blockType, targetEntity) {
     super(gameController, highlightCallback, targetEntity);
@@ -4851,7 +4851,7 @@ class PlaceBlockCommand extends BaseCommand {
     super.begin();
     this.GameController.placeBlock(this, this.BlockType);
   }
-}
+};
 class PlaceDirectionCommand extends BaseCommand {
   constructor(gameController, highlightCallback, blockType, targetEntity, direction) {
     super(gameController, highlightCallback, targetEntity);
@@ -4868,7 +4868,7 @@ class PlaceDirectionCommand extends BaseCommand {
     super.begin();
     this.GameController.placeBlockDirection(this, this.BlockType, this.Direction);
   }
-}
+};
 class PlaceInFrontCommand extends BaseCommand {
   constructor(gameController, highlightCallback, blockType, targetEntity) {
     super(gameController, highlightCallback, targetEntity);
@@ -4884,7 +4884,7 @@ class PlaceInFrontCommand extends BaseCommand {
     super.begin();
     this.GameController.placeBlockForward(this, this.BlockType);
   }
-}
+};
 class RepeatCommand extends BaseCommand {
   constructor(gameController, highlightCallback, actionCallback, iteration, targetEntity) {
     super(gameController, highlightCallback, targetEntity);
@@ -4911,7 +4911,7 @@ class RepeatCommand extends BaseCommand {
       entity.queue.addRepeatCommands(this.actionCallback, this.iteration);
     }
   }
-}
+};
 class TurnCommand extends BaseCommand {
   constructor(gameController, highlightCallback, direction, targetEntity) {
     super(gameController, highlightCallback, targetEntity);
@@ -4930,7 +4930,7 @@ class TurnCommand extends BaseCommand {
     }
     this.GameController.turn(this, this.Direction);
   }
-}
+};
 class LevelBlock {
   constructor(blockType) {
     this.blockType = blockType;
@@ -5484,7 +5484,7 @@ class LevelBlock {
 
     return frame;
   }
-}
+};
 /**
  * Handling non-player entities inside of the level
  */
@@ -5792,7 +5792,7 @@ class LevelEntity {
     this.entityMap.clear();
     this.entityDeathCount = new Map();
   }
-}
+};
 // for blocks on the action plane, we need an actual "block" object, so we can model
 
 class LevelModel {
@@ -6992,7 +6992,7 @@ class LevelModel {
       }
     }
   }
-}
+};
 const {
   opposite,
   turnDirection,
@@ -7827,7 +7827,7 @@ class LevelPlane {
     return 8 * ringSize;
   }
 
-}
+};
 // Hack: `PIXI.canUseNewCanvasBlendModes()` sometimes erroneously returns false.
 // It's supported in all browsers we support.
 if (window.PIXI) {
@@ -10522,7 +10522,7 @@ class LevelView {
     });
   }
 
-}
+};
 var GAME_WIDTH = 400;
 var GAME_HEIGHT = 400;
 
@@ -10727,7 +10727,7 @@ class GameController {
   run() {
     // dispatch when spawn event at run
     this.events.forEach(e => e({ eventType: EventType.WhenRun, targetIdentifier: undefined }));
-    for (let value of this.levelEntity.entityMap) {
+    for (var value of this.levelEntity.entityMap) {
       var entity = value[1];
       this.events.forEach(e => e({ eventType: EventType.WhenSpawned, targetType: entity.type, targetIdentifier: entity.identifier }));
       entity.queue.begin();
@@ -10844,7 +10844,7 @@ class GameController {
     this.commandRecord = new Map;
     this.repeatCommandRecord = new Map;
     this.isRepeat = false;
-    for (let i = 0; i < commandList.length; i++) {
+    for (var i = 0; i < commandList.length; i++) {
       this.commandRecord.set(commandList[i], new Map);
       this.commandRecord.get(commandList[i]).set("count", 0);
       this.repeatCommandRecord.set(commandList[i], new Map);
@@ -10939,7 +10939,7 @@ class GameController {
     // apply to all entities
     if (target === undefined) {
       var entities = this.levelEntity.entityMap;
-      for (let value of entities) {
+      for (var value of entities) {
         let entity = value[1];
         let callbackCommand = new CallbackCommand(this, () => { }, () => { this.moveAway(callbackCommand, moveAwayFrom); }, entity.identifier);
         entity.addCommand(callbackCommand, commandQueueItem.repeat);
@@ -10967,7 +10967,7 @@ class GameController {
         let targetEntities = this.getEntities(target);
         let moveAwayFromEntity = this.getEntity(moveAwayFrom);
         if (moveAwayFromEntity !== undefined) {
-          for (let i = 0; i < targetEntities.length; i++) {
+          for (var i = 0; i < targetEntities.length; i++) {
             // not move if it's same entity
             if (targetEntities[i].identifier === moveAwayFromEntity.identifier) {
               continue;
@@ -11041,7 +11041,7 @@ class GameController {
     // apply to all entities
     if (target === undefined) {
       let entities = this.levelEntity.entityMap;
-      for (let value of entities) {
+      for (var value of entities) {
         let entity = value[1];
         let callbackCommand = new CallbackCommand(this, () => { }, () => { this.moveToward(callbackCommand, moveTowardTo); }, entity.identifier);
         entity.addCommand(callbackCommand, commandQueueItem.repeat);
@@ -11783,13 +11783,13 @@ class GameController {
         var wasOnBlock = player.isOnBlock;
         this.levelView.playDestroyTntAnimation(player.position, player.facing, player.isOnBlock, this.levelModel.getTnt(), this.levelModel.shadingPlane,
           () => {
-            for (let i in tnt) {
+            for (var i in tnt) {
               if (tnt[i].x === this.levelModel.player.position.x && tnt[i].y === this.levelModel.player.position.y) {
                 this.levelModel.player.isOnBlock = false;
               }
               var surroundingBlocks = this.levelModel.getAllBorderingPositionNotOfType(tnt[i], "tnt");
               this.levelModel.destroyBlock(tnt[i]);
-              for (let b = 1; b < surroundingBlocks.length; ++b) {
+              for (var b = 1; b < surroundingBlocks.length; ++b) {
                 if (surroundingBlocks[b][0]) {
                   this.destroyBlockWithoutPlayerInteraction(surroundingBlocks[b][1]);
                 }
