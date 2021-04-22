@@ -76,7 +76,7 @@ class GameController {
     this.tweenTimeScale = 1.5 / this.initialSlowMotion;
 
     this.playerDelayFactor = 1.0;
-    this.dayNightCycle = false;
+    this.dayNightCycle = null;
     this.player = null;
     this.agent = null;
 
@@ -123,6 +123,7 @@ class GameController {
     this.levelModel = new LevelModel(this.levelData, this);
     this.levelView = new LevelView(this);
     this.specialLevelType = levelConfig.specialLevelType;
+    this.dayNightCycle = Number.parseInt(levelConfig.dayNightCycle);
     this.timeout = levelConfig.levelVerificationTimeout;
     if (levelConfig.useScore !== undefined) {
       this.useScore = levelConfig.useScore;
@@ -131,11 +132,14 @@ class GameController {
     this.onDayCallback = levelConfig.onDayCallback;
     this.onNightCallback = levelConfig.onNightCallback;
 
+    if (!Number.isNaN(this.dayNightCycle) && this.dayNightCycle > 1000) {
+      this.setDayNightCycle(this.dayNightCycle, "day");
+    }
     this.game.state.start('levelRunner');
   }
 
   reset() {
-    this.dayNightCycle = false;
+    this.dayNightCycle = null;
     this.queue.reset();
     this.levelEntity.reset();
     this.levelModel.reset();
@@ -255,7 +259,8 @@ class GameController {
       [Phaser.Keyboard.D]: FacingDirection.East,
       [Phaser.Keyboard.S]: FacingDirection.South,
       [Phaser.Keyboard.A]: FacingDirection.West,
-      [Phaser.Keyboard.SPACEBAR]: -2
+      [Phaser.Keyboard.SPACEBAR]: -2,
+      [Phaser.Keyboard.BACKSPACE]: -3
     };
 
     const editableElementSelected = function () {
@@ -887,6 +892,11 @@ class GameController {
     let frontBlock = this.levelModel.actionPlane.getBlockAt(frontPosition);
 
     const isFrontBlockDoor = frontBlock === undefined ? false : frontBlock.blockType === "door";
+    if (player.movementState == -3) {
+      //player.movementState = -1;
+      this.destroyBlock(commandQueueItem);
+      return;
+    }
     if (frontEntity !== null && frontEntity !== this.agent) {
       // push use command to execute general use behavior of the entity before executing the event
       this.levelView.setSelectionIndicatorPosition(frontPosition[0], frontPosition[1]);
@@ -930,13 +940,7 @@ class GameController {
       this.levelView.playTrack(frontPosition, player.facing, true, player, null);
       commandQueueItem.succeeded();
     } else {
-      this.levelView.playPunchDestroyAirAnimation(player.position, player.facing, this.levelModel.getMoveForwardPosition(), () => {
-        this.levelView.setSelectionIndicatorPosition(player.position[0], player.position[1]);
-        this.levelView.playIdleAnimation(player.position, player.facing, player.isOnBlock);
-        this.delayPlayerMoveBy(0, 0, () => {
-          commandQueueItem.succeeded();
-        });
-      });
+      this.placeBlockForward(commandQueueItem, player.selectedItem);
     }
   }
 
@@ -1422,21 +1426,21 @@ class GameController {
     }
   }
 
-  initiateDayNightCycle(firstDelay, delayInSecond, startTime) {
+  initiateDayNightCycle(firstDelay, delayInMs, startTime) {
     if (startTime === "day" || startTime === "Day") {
       this.timeouts.push(setTimeout(() => {
         this.startDay(null);
-        this.setDayNightCycle(delayInSecond, "night");
-      }, firstDelay * 1000));
+        this.setDayNightCycle(delayInMs, "night");
+      }, firstDelay));
     } else if (startTime === "night" || startTime === "Night") {
       this.timeouts.push(setTimeout(() => {
         this.startNight(null);
-        this.setDayNightCycle(delayInSecond, "day");
-      }, firstDelay * 1000));
+        this.setDayNightCycle(delayInMs, "day");
+      }, firstDelay));
     }
   }
 
-  setDayNightCycle(delayInSecond, startTime) {
+  setDayNightCycle(delayInMs, startTime) {
     if (!this.dayNightCycle) {
       return;
     }
@@ -1446,16 +1450,16 @@ class GameController {
           return;
         }
         this.startDay(null);
-        this.setDayNightCycle(delayInSecond, "night");
-      }, delayInSecond * 1000));
+        this.setDayNightCycle(delayInMs, "night");
+      }, delayInMs));
     } else if (startTime === "night" || startTime === "Night") {
       this.timeouts.push(setTimeout(() => {
         if (!this.dayNightCycle) {
           return;
         }
         this.startNight(null);
-        this.setDayNightCycle(delayInSecond, "day");
-      }, delayInSecond * 1000));
+        this.setDayNightCycle(delayInMs, "day");
+      }, delayInMs));
     }
   }
 

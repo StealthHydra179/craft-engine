@@ -55,6 +55,7 @@ function getCodeOrgAPI(controller) {
           onAttemptComplete && onAttemptComplete(...args);
           resolve(args[0]);
         };
+        controller.initiateDayNightCycle(controller.dayNightCycle, controller.dayNightCycle, "day");
         controller.setPlayerActionDelayByQueueLength();
         controller.queue.begin();
         controller.run();
@@ -86,12 +87,7 @@ function getCodeOrgAPI(controller) {
      *  }
      */
     registerEventCallback(highlightCallback, codeBlockCallback) {
-      // TODO(bjordan): maybe need to also handle top-level event block highlighting
       controller.events.push(codeBlockCallback);
-
-      // in controller:
-      // this.events.forEach((e) => e({ type: EventType.BLOCK_DESTROYED, blockType: 'logOak' });
-      // (and clear out on reset)
     },
 
     onEventTriggered: function (highlightCallback, type, eventType, callback) {
@@ -212,10 +208,12 @@ function getCodeOrgAPI(controller) {
     ifBlockAhead: function (highlightCallback, blockType, targetEntity, codeBlock) {
       controller.addCommand(new IfBlockAheadCommand(controller, highlightCallback, blockType, targetEntity, codeBlock), targetEntity);
     },
+
     // -1 for infinite repeat
     repeat: function (highlightCallback, codeBlock, iteration, targetEntity) {
       controller.addCommand(new RepeatCommand(controller, highlightCallback, codeBlock, iteration, targetEntity));
     },
+
     // -1 for infinite repeat
     repeatRandom: function (highlightCallback, codeBlock, targetEntity) {
       var maxIteration = 10;
@@ -3409,6 +3407,7 @@ class Player extends BaseEntity {
     this.movementState = -1;
     this.onTracks = false;
     this.getOffTrack = false;
+    this.selectedItem = null;
 
     if (controller.getIsDirectPlayerControl()) {
       this.moveDelayMin = 0;
@@ -3486,16 +3485,14 @@ class Player extends BaseEntity {
     }
 
     if (this.canUpdateMovement()) {
-      // Arrow key
-      if (this.movementState >= 0) {
+      if (this.movementState >= 0) { // WASD
         let direction = this.movementState;
         let callbackCommand = new CallbackCommand(this, () => { }, () => {
           this.lastMovement = +new Date();
           this.controller.moveDirection(callbackCommand, direction);
         }, this.identifier);
         this.addCommand(callbackCommand);
-        // Spacebar
-      } else {
+      } else { // Spacebar/Backspace
         let callbackCommand = new CallbackCommand(this, () => { }, () => {
           this.lastMovement = +new Date();
           this.controller.use(callbackCommand);
@@ -10601,7 +10598,7 @@ class GameController {
     this.tweenTimeScale = 1.5 / this.initialSlowMotion;
 
     this.playerDelayFactor = 1.0;
-    this.dayNightCycle = false;
+    this.dayNightCycle = null;
     this.player = null;
     this.agent = null;
 
@@ -10648,6 +10645,7 @@ class GameController {
     this.levelModel = new LevelModel(this.levelData, this);
     this.levelView = new LevelView(this);
     this.specialLevelType = levelConfig.specialLevelType;
+    this.dayNightCycle = Number.parseInt(levelConfig.dayNightCycle);
     this.timeout = levelConfig.levelVerificationTimeout;
     if (levelConfig.useScore !== undefined) {
       this.useScore = levelConfig.useScore;
@@ -10656,11 +10654,14 @@ class GameController {
     this.onDayCallback = levelConfig.onDayCallback;
     this.onNightCallback = levelConfig.onNightCallback;
 
+    if (!Number.isNaN(this.dayNightCycle) && this.dayNightCycle > 1000) {
+      this.setDayNightCycle(this.dayNightCycle, "day");
+    }
     this.game.state.start('levelRunner');
   }
 
   reset() {
-    this.dayNightCycle = false;
+    this.dayNightCycle = null;
     this.queue.reset();
     this.levelEntity.reset();
     this.levelModel.reset();
@@ -10780,7 +10781,8 @@ class GameController {
       [Phaser.Keyboard.D]: FacingDirection.East,
       [Phaser.Keyboard.S]: FacingDirection.South,
       [Phaser.Keyboard.A]: FacingDirection.West,
-      [Phaser.Keyboard.SPACEBAR]: -2
+      [Phaser.Keyboard.SPACEBAR]: -2,
+      [Phaser.Keyboard.BACKSPACE]: -3
     };
 
     const editableElementSelected = function () {
@@ -11412,6 +11414,11 @@ class GameController {
     let frontBlock = this.levelModel.actionPlane.getBlockAt(frontPosition);
 
     const isFrontBlockDoor = frontBlock === undefined ? false : frontBlock.blockType === "door";
+    if (player.movementState == -3) {
+      //player.movementState = -1;
+      this.destroyBlock(commandQueueItem);
+      return;
+    }
     if (frontEntity !== null && frontEntity !== this.agent) {
       // push use command to execute general use behavior of the entity before executing the event
       this.levelView.setSelectionIndicatorPosition(frontPosition[0], frontPosition[1]);
@@ -11455,13 +11462,7 @@ class GameController {
       this.levelView.playTrack(frontPosition, player.facing, true, player, null);
       commandQueueItem.succeeded();
     } else {
-      this.levelView.playPunchDestroyAirAnimation(player.position, player.facing, this.levelModel.getMoveForwardPosition(), () => {
-        this.levelView.setSelectionIndicatorPosition(player.position[0], player.position[1]);
-        this.levelView.playIdleAnimation(player.position, player.facing, player.isOnBlock);
-        this.delayPlayerMoveBy(0, 0, () => {
-          commandQueueItem.succeeded();
-        });
-      });
+      this.placeBlockForward(commandQueueItem, player.selectedItem);
     }
   }
 
@@ -11947,21 +11948,21 @@ class GameController {
     }
   }
 
-  initiateDayNightCycle(firstDelay, delayInSecond, startTime) {
+  initiateDayNightCycle(firstDelay, delayInMs, startTime) {
     if (startTime === "day" || startTime === "Day") {
       this.timeouts.push(setTimeout(() => {
         this.startDay(null);
-        this.setDayNightCycle(delayInSecond, "night");
-      }, firstDelay * 1000));
+        this.setDayNightCycle(delayInMs, "night");
+      }, firstDelay));
     } else if (startTime === "night" || startTime === "Night") {
       this.timeouts.push(setTimeout(() => {
         this.startNight(null);
-        this.setDayNightCycle(delayInSecond, "day");
-      }, firstDelay * 1000));
+        this.setDayNightCycle(delayInMs, "day");
+      }, firstDelay));
     }
   }
 
-  setDayNightCycle(delayInSecond, startTime) {
+  setDayNightCycle(delayInMs, startTime) {
     if (!this.dayNightCycle) {
       return;
     }
@@ -11971,16 +11972,16 @@ class GameController {
           return;
         }
         this.startDay(null);
-        this.setDayNightCycle(delayInSecond, "night");
-      }, delayInSecond * 1000));
+        this.setDayNightCycle(delayInMs, "night");
+      }, delayInMs));
     } else if (startTime === "night" || startTime === "Night") {
       this.timeouts.push(setTimeout(() => {
         if (!this.dayNightCycle) {
           return;
         }
         this.startNight(null);
-        this.setDayNightCycle(delayInSecond, "day");
-      }, delayInSecond * 1000));
+        this.setDayNightCycle(delayInMs, "day");
+      }, delayInMs));
     }
   }
 
