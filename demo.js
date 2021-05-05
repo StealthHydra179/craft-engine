@@ -1,16 +1,4 @@
-var previous = false;
-
-var levelselect = document.getElementById('level-load');
-var speedslider = document.getElementById('speed-slider');
-var speeddisplay = document.getElementById('speed-display');
-var phasergame = document.getElementById('phaser-game');
-var codemirroreditor = document.getElementById('codemirror-editor');
-var game = document.getElementById('game');
-var body = document.body;
-var playbutton = document.getElementById('play-button');
-var consolepre = document.getElementById('console-pre');
-var consoleerrors = document.getElementById('console-errors');
-var blocktype = document.getElementById('block-type');
+/* global $, GameController, levels, Sounds */
 
 var defaults = {
   assetPacks: {
@@ -18,29 +6,16 @@ var defaults = {
     afterLoad: [],
   },
   gridDimensions: [10, 10],
-  fluffPlane: new Array(100).fill(''),
+  fluffPlane: ["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],
   playerName: 'Alex',
   playerStartPosition: [],
 };
 
-var codemirror = CodeMirror.fromTextArea(codemirroreditor, {
-  lineNumbers: true,
-  mode: 'javascript'
-});
-
-var rightwidth = body.clientWidth - Number.parseInt(getComputedStyle(body).fontSize) * 2 - game.offsetWidth;
-
-codemirror.setSize(rightwidth, game.offsetHeight + 200);
-consoleerrors.style.width = rightwidth;
-consolepre.style.width = rightwidth;
-consoleerrors.style.height = 200;
-consolepre.style.height = 200;
-
 function getParameterByName(name) {
-  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-  var regex = new RegExp(`[\\?&]${name}=([^&#]*)`);
-  var results = regex.exec(location.search);
-  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 var levelParam = getParameterByName('level');
@@ -56,62 +31,77 @@ var gameController = new GameController({
   debug: true,
   earlyLoadAssetPacks: testLevelToLoad.earlyLoadAssetPacks,
   earlyLoadNiceToHaveAssetPacks: testLevelToLoad.earlyLoadNiceToHaveAssetPacks,
-  afterAssetsLoaded: function () {},
-});
-
-var api = Object.assign(gameController.codeOrgAPI, {
-  log: function (msg) {
-    consoleerrors.innerText += '[LOG] ' + msg + '\n';
+  afterAssetsLoaded: () => {
+    gameController.codeOrgAPI.startAttempt();
   },
-  error: function (msg) {
-    consoleerrors.innerText += '[ERR] ' + msg + '\n';
-  },
-  warning: function (msg) {
-    consoleerrors.innerText += '[WARN] ' + msg + '\n';
-  }
 });
 
 gameController.loadLevel(testLevelToLoad);
 
+var $levelselect = $('#level-load');
 Object.keys(levels).forEach(key => {
-  var option = document.createElement('option');
-  option.text = key;
-  option.selected = key === levelParam;
-  levelselect.appendChild(option);
+  $levelselect.append($('<option/>', {text: key, selected: key === levelParam}));
 });
 
-document.addEventListener('input', function (event) {
-  if (event.target.id == 'level-load') {
-    location.search = `level=${levelselect.options[levelselect.selectedIndex].value}`;
-  } else if (event.target.id == 'speed-slider') {
-    speeddisplay.innerHTML = `Speed: ${speedslider.value}x`;
-    gameController.game.time.slowMotion = 1.5 / Number.parseFloat(speedslider.value, 10);
+$levelselect.on('change', () => {
+  location.search = `level=${$levelselect.val()}`;
+});
+
+$('input[type=range]').on('input', function () {
+  $("#speed-display").html('Speed: ' + $(this).val() + 'x');
+  gameController.game.time.slowMotion = 1.5 / parseFloat($(this).val(), 10);
+});
+
+$('#reset-button').click(function () {
+  gameController.codeOrgAPI.resetAttempt();
+  gameController.codeOrgAPI.startAttempt();
+});
+
+if (!gameController.levelData.isAgentLevel) {
+  $('#entity-select').hide();
+}
+
+window.addEventListener('keydown', e => {
+  if (e.target !== document.body) {
+    e.preventDefault();
   }
-}, false);
+  e.stopImmediatePropagation();
 
-document.getElementById('stop-button').addEventListener('click', function () {
-  api.resetAttempt();
-  previous = false;
-});
+  var target = $('input[name=target]:checked').val();
+  var instance = target === 'Player' ? gameController.player : gameController.agent;
 
-playbutton.addEventListener('click', function () {
-  if (previous) {
-    api.resetAttempt();
+  if (instance.queue.getLength() > 0) {
+    return;
   }
-  previous = true;
-  playbutton.blur();
-  phasergame.focus();
-  gameController.game.canvas.id = 'game-canvas';
-  gameController.player.selectedItem = blocktype.options[blocktype.selectedIndex].text;
-  try {this.selectedItem
-    new Function('api', `'use strict'; ${codemirror.getValue()}`)(api);
-  } catch (err) {
-    consoleerrors.innerText += '[ERR] ' + err + '\n';
-    consolepre.scrollTop = consolepre.scrollHeight - consolepre.clientHeight;
-  }
-  api.startAttempt();
-});
 
-blocktype.addEventListener('change', function () {
-  gameController.player.selectedItem = blocktype.options[blocktype.selectedIndex].text;
-});
+  switch (e.keyCode) {
+    case 8:
+    case 46:
+      gameController.codeOrgAPI.destroyBlock(null, target);
+      break;
+    case 13:
+      gameController.codeOrgAPI.placeInFront(null, $('#block-type').val(), target);
+      break;
+    case 16:
+      $('input[name=target]:not(:checked)').prop('checked', true);
+      break;
+    case 38:
+    case 87:
+      gameController.codeOrgAPI.moveDirection(null, target, 0);
+      break;
+    case 40:
+    case 83:
+      gameController.codeOrgAPI.moveDirection(null, target, 2);
+      break;
+    case 37:
+    case 65:
+      gameController.codeOrgAPI.moveDirection(null, target, 3);
+      break;
+    case 39:
+    case 68:
+      gameController.codeOrgAPI.moveDirection(null, target, 1);
+      break;
+  }
+}, true);
+
+window.gameController = gameController;
