@@ -26,7 +26,16 @@ var defaultScript = `/*
  */
 
 api.log("Hi!");
-api.spawnEntity(null, "cow", "middle"); // Spawns a Cow in the "middle" region
+
+// Spawns a Cow in the at (4,4) facing south
+api.spawnEntity(null, "cow", {
+	"x": 4,
+	"y": 4,
+	"rot": FacingDirection.South
+});
+
+// You can also spawn mobs at random positions, like this
+api.spawnEntity(null, "creeper", "random");
 
 `;
 
